@@ -4,7 +4,7 @@ const session = require('express-session');
 const { authenticator } = require('otplib');
 const QRCode = require('qrcode');
 const jwt = require('jsonwebtoken');
-const expressJWT = require('express-jwt');
+const { expressjwt } = require('express-jwt');
 const bodyParser = require('body-parser');
 const app = express();
 const port = 3000;
@@ -124,13 +124,13 @@ app.get('/login', (req, res) => {
 
 app.post('/login', (req, res) => {
   //verify login
-  const email = req.body.email,
-    code = req.body.code;
+  const email = req.body.email;
+  const code = req.body.code;
 
   return verifyLogin(email, code, req, res, '/login');
 });
 
-const jwtMiddleware = expressJWT({
+const jwtMiddleware = expressjwt({
   secret: TOTP_SECRET,
   algorithms: ['HS256'],
   getToken: (req) => {
@@ -139,7 +139,8 @@ const jwtMiddleware = expressJWT({
 });
 
 app.get('/private', jwtMiddleware, (req, res) => {
-  return res.render('private.ejs', { email: req.user });
+  console.log(req.session);
+  return res.render('private.ejs', { email: req.auth });
 });
 
 app.get('/logout', jwtMiddleware, (req, res) => {
